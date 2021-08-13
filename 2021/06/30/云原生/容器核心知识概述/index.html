@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>容器核心知识概述 | ATouch</title><meta name="keywords" content="docker,容器"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="讲解关于容器的what、why、how三个问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="容器核心知识概述">
+<meta property="og:url" content="https://litao-2071.github.io/advance-docs/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="讲解关于容器的what、why、how三个问题">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-06-30T08:17:00.000Z">
+<meta property="article:modified_time" content="2021-08-12T15:35:14.372Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="容器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/advance-docs/img/favicon.png"><link rel="canonical" href="https://litao-2071.github.io/advance-docs/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E6%A6%82%E8%BF%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/advance-docs/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/advance-docs/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '容器核心知识概述',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-08-12 23:35:14'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/advance-docs/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/advance-docs/archives/"><div class="headline">文章</div><div class="length-num">37</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/advance-docs/tags/"><div class="headline">標籤</div><div class="length-num">24</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/advance-docs/categories/"><div class="headline">分類</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/advance-docs/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/advance-docs/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/advance-docs/clean-code/"><i class="fa-fw fas fa-video"></i><span> 整洁代码之道</span></a></li><li><a class="site-page child" href="/advance-docs/cloud/"><i class="fa-fw fas fa-music"></i><span> 云原生</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/advance-docs/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/advance-docs/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/advance-docs/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/advance-docs/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/advance-docs/clean-code/"><i class="fa-fw fas fa-video"></i><span> 整洁代码之道</span></a></li><li><a class="site-page child" href="/advance-docs/cloud/"><i class="fa-fw fas fa-music"></i><span> 云原生</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/advance-docs/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/advance-docs/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">容器核心知识概述</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-06-30T08:17:00.000Z" title="發表於 2021-06-30 16:17:00">2021-06-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2021-08-12T15:35:14.372Z" title="更新於 2021-08-12 23:35:14">2021-08-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/advance-docs/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="容器核心知识概述"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="什么是容器"><a href="#什么是容器" class="headerlink" title="什么是容器?"></a>什么是容器?</h2><blockquote>
+<p>容器是一种轻量级、可移植、自包含的软件打包技术，由它打包的应用可以几乎在任何地方无差别的运行</p>
+</blockquote>
+<p><code>自包含</code>：指容器拥有程序所需要的基本运行时；</p>
+<p><code>可移植</code>：指容器具有跨平台的作用；</p>
+<p><code>轻量级</code>：指容器的大小非常轻量；</p>
+<p><strong>容器与虚拟机</strong></p>
+<p>这里我们把<code>容器</code>和<code>虚拟机</code>做一个比较<br><img src="https://i.loli.net/2021/08/01/1cheH7nY6S2mwOo.png" alt="20210801214008"></p>
+<ul>
+<li><p>轻量</p>
+<p>一个虚拟机通常的大小通常几十个GB,需要安装<code>部署的应用</code>、<code>应用的依赖</code>、<code>完整的操作系统</code>；</p>
+<p>一个容器通常大小几十MB，只需要安装<code>部署的应用</code>、<code>应用的依赖</code>，操作系统复用host os</p>
+</li>
+<li><p>隔离性</p>
+<p>  虚拟机的隔离性是优于容器的；容器共享host的kernel，所以内核的版本是无法修改的；</p>
+</li>
+</ul>
+<p>可以说容器牺牲了一些隔离性换取了轻量的特性。</p>
+<hr>
+<h2 id="为什么使用容器？"><a href="#为什么使用容器？" class="headerlink" title="为什么使用容器？"></a>为什么使用容器？</h2><blockquote>
+<p>简单来说：它让应用程序具有了超强的可移植能力</p>
+</blockquote>
+<p>现在的大部分应用程序，都是由多个服务构建、组织而成（MQ、DB、…）,这些服务都有自己的依赖，都可能部署到不同的硬件环境（共有云、私有云、虚拟机…）,这样排列组合下来会产生各种情况，需要开发人员开发时考虑运行环境的不同，运维人员也要根据不同的服务和运行环境做出不同配置。</p>
+<p><strong>容器就是抹平了由不同服务和平台带来的复杂度；</strong></p>
+<p>可以类比<code>运输行业</code>:</p>
+<p>各种不同的物品可能需要不同的运输工具运输，而集装箱抹平了这一层的复杂度，无论是钢琴还是大米都统一放到各自的集装箱中。标准的集装箱可以适配各种交通工具，方便的在各个运输工具之间移动。</p>
+<hr>
+<h2 id="容器是如何运行的？"><a href="#容器是如何运行的？" class="headerlink" title="容器是如何运行的？"></a>容器是如何运行的？</h2><p><img src="https://i.loli.net/2021/08/01/ncojRaOhUZsyENl.png" alt="20210801214840"></p>
+<h3 id="容器的架构"><a href="#容器的架构" class="headerlink" title="容器的架构"></a>容器的架构</h3><p>docker采用Client/Server架构。<br>核心组件如下</p>
+<ol>
+<li><p>docker 客户端：client</p>
+<p> 最常用的client就是 <code>docker命令</code>，当然也可以通过 <code>REST API</code> 与服务器通讯.</p>
+</li>
+<li><p>docker 服务器：daemon</p>
+<p> <code>docker daemon</code>负责创建、存储镜像，创建、运行、管理容器；不仅可以接收本地host的客户端请求，还可以接收远程客户端请求（需要修改配置文件，打开tcp监听）</p>
+</li>
+<li><p>docker 镜像：images</p>
+<p> 用于创建docker容器的只读模版；<br> 你可以把它看作一个类，而容器就是它生成的对象实例；</p>
+</li>
+<li><p>docker 容器：containers</p>
+<p> docker 镜像运行的实例；按照软件的生命周期理解，镜像处于软件的<code>构建、打包阶段</code>，容器处于软件<code>启动、运行阶段</code></p>
+</li>
+<li><p>registry</p>
+<p> 存放docker镜像的仓库，分为私有和公有；</p>
+<p> 公有的比如 <code>docker hub</code>，私有库可以使用docker hub上提供的 registry 容器快速搭建；</p>
+</li>
+</ol>
+<h3 id="案例（运行流程）"><a href="#案例（运行流程）" class="headerlink" title="案例（运行流程）"></a>案例（运行流程）</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 8080:80 httpd</span><br></pre></td></tr></table></figure>
+<p><img src="https://i.loli.net/2021/08/02/DBRI9GrasvWXc73.png" alt="20210802002744"></p>
+<p>（1）在本地寻找镜像，未找到</p>
+<p>（2）在register（docker hub）拉取镜像</p>
+<p>（3）远程镜像下载到本地了</p>
+<p>（4）创建运行容器</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://litao-2071.github.io/advance-docs/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E6%A6%82%E8%BF%B0/">https://litao-2071.github.io/advance-docs/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E6%A6%82%E8%BF%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://litao-2071.github.io/advance-docs" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/advance-docs/tags/docker/">docker</a><a class="post-meta__tags" href="/advance-docs/tags/%E5%AE%B9%E5%99%A8/">容器</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/advance-docs/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/advance-docs/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">容器技术全览</div></div></a></div><div class="next-post pull-right"><a href="/advance-docs/2021/06/30/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/4-7%E5%B1%82/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/advance-docs/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">网络分层模型，4、7层？</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相關推薦</span></div><div class="relatedPosts-list"><div><a href="/advance-docs/2021/06/30/云原生/docker/" title="docker 常用命令与概念"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-30</div><div class="title">docker 常用命令与概念</div></div></a></div><div><a href="/advance-docs/2021/06/30/云原生/容器技术/" title="容器技术全览"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-30</div><div class="title">容器技术全览</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/advance-docs/img/profile.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/advance-docs/archives/"><div class="headline">文章</div><div class="length-num">37</div></a></div><div class="card-info-data-item is-center"><a href="/advance-docs/tags/"><div class="headline">標籤</div><div class="length-num">24</div></a></div><div class="card-info-data-item is-center"><a href="/advance-docs/categories/"><div class="headline">分類</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/litao-2071/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/litao-2071/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AE%B9%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">什么是容器?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E5%AE%B9%E5%99%A8%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">为什么使用容器？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E6%98%AF%E5%A6%82%E4%BD%95%E8%BF%90%E8%A1%8C%E7%9A%84%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">容器是如何运行的？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E6%9E%B6%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">容器的架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%EF%BC%88%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">案例（运行流程）</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/advance-docs/2021/08/12/%E5%AD%98%E5%82%A8/gorm/" title="無題"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/404.jpg'" alt="無題"/></a><div class="content"><a class="title" href="/advance-docs/2021/08/12/%E5%AD%98%E5%82%A8/gorm/" title="無題">無題</a><time datetime="2021-08-12T15:36:21.244Z" title="發表於 2021-08-12 23:36:21">2021-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/advance-docs/2021/08/12/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E9%95%9C%E5%83%8F/" title="無題"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/404.jpg'" alt="無題"/></a><div class="content"><a class="title" href="/advance-docs/2021/08/12/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E9%95%9C%E5%83%8F/" title="無題">無題</a><time datetime="2021-08-12T15:35:14.359Z" title="發表於 2021-08-12 23:35:14">2021-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/advance-docs/2021/08/12/%E5%B7%A5%E5%85%B7/%E5%BC%80%E5%8F%91/git/" title="無題"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/404.jpg'" alt="無題"/></a><div class="content"><a class="title" href="/advance-docs/2021/08/12/%E5%B7%A5%E5%85%B7/%E5%BC%80%E5%8F%91/git/" title="無題">無題</a><time datetime="2021-08-12T15:35:14.176Z" title="發表於 2021-08-12 23:35:14">2021-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/advance-docs/2021/08/09/hexo_qiuck_start/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/advance-docs/2021/08/09/hexo_qiuck_start/" title="Hello World">Hello World</a><time datetime="2021-08-09T12:42:52.880Z" title="發表於 2021-08-09 20:42:52">2021-08-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/advance-docs/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/advance-docs/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/advance-docs/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/advance-docs/js/utils.js"></script><script src="/advance-docs/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'litao-2071/advance-docs')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
