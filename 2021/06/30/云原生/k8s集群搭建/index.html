@@ -1,0 +1,263 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>k8s 集群快速搭建 | ATouch</title><meta name="keywords" content="k8s"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="安装 k8s集群的几种方式序如果只是用于学习，建议kind、minikube、docker desktop比较简单（个人比较推荐kind、docker desktop），如果你是想要更深入的摸索还是需要安装kubeadmin minikube、kind、docker desktop我都是直接在 mac上搭建 kubeadmin我启用3台 ubuntu16 虚拟机搭建  minikube（mac）1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s 集群快速搭建">
+<meta property="og:url" content="https://litao-2071.github.io/blog/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="安装 k8s集群的几种方式序如果只是用于学习，建议kind、minikube、docker desktop比较简单（个人比较推荐kind、docker desktop），如果你是想要更深入的摸索还是需要安装kubeadmin minikube、kind、docker desktop我都是直接在 mac上搭建 kubeadmin我启用3台 ubuntu16 虚拟机搭建  minikube（mac）1">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-06-30T08:17:00.000Z">
+<meta property="article:modified_time" content="2021-08-18T12:18:48.377Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="https://litao-2071.github.io/blog/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'k8s 集群快速搭建',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-08-18 20:18:48'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">36</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">23</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/blog/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">k8s 集群快速搭建</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-06-30T08:17:00.000Z" title="發表於 2021-06-30 16:17:00">2021-06-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2021-08-18T12:18:48.377Z" title="更新於 2021-08-18 20:18:48">2021-08-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="k8s 集群快速搭建"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="安装-k8s集群的几种方式"><a href="#安装-k8s集群的几种方式" class="headerlink" title="安装 k8s集群的几种方式"></a>安装 k8s集群的几种方式</h1><h2 id="序"><a href="#序" class="headerlink" title="序"></a>序</h2><p>如果只是用于学习，建议<code>kind、minikube、docker desktop</code>比较简单（个人比较推荐kind、docker desktop），如果你是想要更深入的摸索还是需要安装<code>kubeadmin</code></p>
+<p><code>minikube、kind、docker desktop</code>我都是直接在 <code>mac</code>上搭建</p>
+<p><code>kubeadmin</code>我启用3台 <code>ubuntu16</code> 虚拟机搭建</p>
+<hr>
+<h2 id="minikube（mac）"><a href="#minikube（mac）" class="headerlink" title="minikube（mac）"></a>minikube（mac）</h2><h3 id="1-安装docker"><a href="#1-安装docker" class="headerlink" title="1.安装docker"></a>1.安装docker</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install docker</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装虚拟机"><a href="#2-安装虚拟机" class="headerlink" title="2.安装虚拟机"></a>2.安装虚拟机</h3><p>可以是 virtualbox、Hypervisor等多种</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git <span class="built_in">clone</span> https://github.com/moby/hyperkit.git</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> hyperkit</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> make</span> </span><br><span class="line"><span class="meta">$</span><span class="bash"> cp ./build/hyperkit /usr/<span class="built_in">local</span>/bin/hyperkit</span></span><br></pre></td></tr></table></figure>
+
+<p>具体查看：<a target="_blank" rel="noopener" href="https://minikube.sigs.k8s.io/docs/drivers/hyperkit/">https://minikube.sigs.k8s.io/docs/drivers/hyperkit/</a></p>
+<h3 id="3-安装配置minikube"><a href="#3-安装配置minikube" class="headerlink" title="3.安装配置minikube"></a>3.安装配置minikube</h3><ul>
+<li><p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 \</span></span><br><span class="line"><span class="bash">  &amp;&amp; chmod +x minikube</span></span><br><span class="line">sudo mv minikube /usr/local/bin</span><br></pre></td></tr></table></figure></li>
+<li><p>配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> minikube config <span class="built_in">set</span> driver hyperkit</span></span><br></pre></td></tr></table></figure></li>
+<li><p>启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> minikube start</span></span><br></pre></td></tr></table></figure>
+<p>可指定参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> minikube start \</span></span><br><span class="line"><span class="bash">    --cpus=8 \</span></span><br><span class="line"><span class="bash">    --v=4 \</span></span><br><span class="line"><span class="bash">    --memory=8192 \</span></span><br><span class="line"><span class="bash">    --network-plugin=cni \</span></span><br><span class="line"><span class="bash">    --enable-default-cni \</span></span><br><span class="line"><span class="bash">    --bootstrapper=kubeadm \</span></span><br><span class="line"><span class="bash">    --kubernetes-version v1.18.3 \</span></span><br><span class="line"><span class="bash">    --image-mirror-country=cn \</span></span><br><span class="line"><span class="bash">    --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers</span></span><br></pre></td></tr></table></figure>
+<p>具体查看 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/releases">https://github.com/kubernetes/minikube/releases</a></p>
+</li>
+</ul>
+<h3 id="4-安装kubectl"><a href="#4-安装kubectl" class="headerlink" title="4.安装kubectl"></a>4.安装kubectl</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl -LO https://dl.k8s.io/v1.18.6/kubernetes-client-darwin-amd64.tar.gz</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-reference"><a href="#5-reference" class="headerlink" title="5.reference"></a>5.reference</h3><p><a target="_blank" rel="noopener" href="https://minikube.sigs.k8s.io/docs/">https://minikube.sigs.k8s.io/docs/</a></p>
+<p><a target="_blank" rel="noopener" href="https://erikjiang.github.io/2019/03/09/MinikubeInstall/">https://erikjiang.github.io/2019/03/09/MinikubeInstall/</a></p>
+<hr>
+<h2 id="kubeadm-ubuntu"><a href="#kubeadm-ubuntu" class="headerlink" title="kubeadm (ubuntu)"></a>kubeadm (ubuntu)</h2><blockquote>
+<p>kubeadm我是安装在3台 <code>ubuntu16</code> 虚拟机上，一台master，两台slave</p>
+<p>我使用的 <code>vagrant</code> 初始化的三台机器，你可以参考我的虚拟机配置</p>
+</blockquote>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">Vagrant.configure(<span class="string">&quot;2&quot;</span>) <span class="keyword">do</span> <span class="params">|config|</span></span><br><span class="line">  config.vm.box = <span class="string">&quot;ubuntu/xenial64&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># k8s slave node</span></span><br><span class="line">  config.vm.define <span class="string">&quot;node1&quot;</span> <span class="keyword">do</span> <span class="params">|t|</span></span><br><span class="line">   t.vm.hostname = <span class="string">&quot;node1&quot;</span></span><br><span class="line">   t.vm.network <span class="string">&quot;private_network&quot;</span>, <span class="symbol">ip:</span> <span class="string">&quot;192.168.56.106&quot;</span></span><br><span class="line">   t.vm.provider <span class="string">&quot;virtualbox&quot;</span> <span class="keyword">do</span> <span class="params">|vb|</span></span><br><span class="line">      vb.memory = <span class="string">&quot;2048&quot;</span></span><br><span class="line">      vb.cpus = <span class="number">2</span></span><br><span class="line">   <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># k8s slave node</span></span><br><span class="line">  config.vm.define <span class="string">&quot;node2&quot;</span> <span class="keyword">do</span> <span class="params">|t|</span></span><br><span class="line">   t.vm.hostname = <span class="string">&quot;node2&quot;</span></span><br><span class="line">   t.vm.network <span class="string">&quot;private_network&quot;</span>, <span class="symbol">ip:</span> <span class="string">&quot;192.168.56.107&quot;</span></span><br><span class="line">   t.vm.provider <span class="string">&quot;virtualbox&quot;</span> <span class="keyword">do</span> <span class="params">|vb|</span></span><br><span class="line">      vb.memory = <span class="string">&quot;2048&quot;</span></span><br><span class="line">      vb.cpus = <span class="number">2</span></span><br><span class="line">   <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># k8s master node</span></span><br><span class="line">  config.vm.define <span class="string">&quot;master&quot;</span> <span class="keyword">do</span> <span class="params">|t|</span></span><br><span class="line">   t.vm.hostname = <span class="string">&quot;master&quot;</span></span><br><span class="line">   t.vm.network <span class="string">&quot;private_network&quot;</span>, <span class="symbol">ip:</span> <span class="string">&quot;192.168.56.105&quot;</span></span><br><span class="line">   t.vm.provider <span class="string">&quot;virtualbox&quot;</span> <span class="keyword">do</span> <span class="params">|vb|</span></span><br><span class="line">      vb.memory = <span class="string">&quot;2048&quot;</span></span><br><span class="line">      vb.cpus = <span class="number">2</span></span><br><span class="line">   <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-设置存储库"><a href="#1-设置存储库" class="headerlink" title="1.设置存储库"></a>1.设置存储库</h3><ol>
+<li><p>更新apt包索引和安装包，以允许apt使用HTTPS存储库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-get update</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-get install \</span></span><br><span class="line"><span class="bash">    apt-transport-https \</span></span><br><span class="line"><span class="bash">    ca-certificates \</span></span><br><span class="line"><span class="bash">    curl \</span></span><br><span class="line"><span class="bash">    gnupg-agent \</span></span><br><span class="line"><span class="bash">    software-properties-common</span></span><br></pre></td></tr></table></figure></li>
+<li><p>添加Docker的官方GPG密钥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg</span><br></pre></td></tr></table></figure></li>
+<li><p>设置稳定存储库</p>
+<div class="tabs" id="terminal"><ul class="nav-tabs"><li class="tab active"><button type="button" data-href="#terminal-1">amd64</button></li><li class="tab"><button type="button" data-href="#terminal-2">arm64</button></li><li class="tab"><button type="button" data-href="#terminal-3">armhf</button></li></ul><div class="tab-contents"><div class="tab-item-content active" id="terminal-1"><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo \</span><br><span class="line">  &quot;deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \</span><br><span class="line"><span class="meta">  $</span><span class="bash">(lsb_release -cs) stable<span class="string">&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span></span></span><br></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="terminal-2"><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo \</span><br><span class="line"> &quot;deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \</span><br><span class="line"><span class="meta"> $</span><span class="bash">(lsb_release -cs) stable<span class="string">&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span></span></span><br></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="terminal-3"><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo \</span><br><span class="line"> &quot;deb [arch=armhf signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \</span><br><span class="line"><span class="meta"> $</span><span class="bash">(lsb_release -cs) stable<span class="string">&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span></span></span><br></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div></li>
+</ol>
+<h3 id="2-下载docker引擎"><a href="#2-下载docker引擎" class="headerlink" title="2.下载docker引擎"></a>2.下载docker引擎</h3><p>直接下载最新版本，或者指定版本，建议指定版本</p>
+<p>下载指定版本docker<br>你可以<code>sudo apt-cache search &lt;keyword&gt;</code>选择一个版本拉取，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install docker-ce=5:19.03.15~3-0~ubuntu-xenial docker-ce-cli=5:19.03.15~3-0~ubuntu-xenial containerd.io</span><br></pre></td></tr></table></figure>
+
+<p>下载最新版本docker</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-初始化k8s"><a href="#3-初始化k8s" class="headerlink" title="3.初始化k8s"></a>3.初始化k8s</h3><p><strong>1）所以节点安装kubeadm, kubelet and kubectl</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> cat &lt;&lt;<span class="string">EOF &gt; /etc/apt/sources.list.d/kubernetes.list</span></span></span><br><span class="line"> deb http://mirrors.ustc.edu.cn/kubernetes/apt kubernetes-xenial main</span><br><span class="line"> EOF</span><br></pre></td></tr></table></figure>
+<p>建议下载指定版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-get update</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-get install kubelet=1.19.14-00 kubeadm=1.19.14-00 kubectl=1.19.14-00</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-mark hold kubelet kubeadm kubectl</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>2）master 节点初始化</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.56.105 --kubernetes-version=v1.9.0 --ignore-preflight-errors=Swap</span> </span><br></pre></td></tr></table></figure>
+<p><code>master kubeadm init</code>后，会在控制台最后输出提示操作 告诉你从节点如何加入等等<br><strong>3）slave 节点加入</strong><br><code>token</code>在<code>master kubeadm init</code>后会有提示，如果忘记可以 <code>kubeadm token list</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> kubeadm join 192.168.56.105:6443 --token 3vk2sd.iyys3n5yxbx9glee     --discovery-token-ca-cert-hash sha256:444546e2b0312dd012835cb1018cb5f90bac657cf53c513854393307fc164131</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>4）验证</strong><br>在 <code>master</code> 节点输入如下命令</p>
+<p><img src="https://i.loli.net/2021/08/18/QSw3tRkdWDrflHY.png" alt="20210818195455"></p>
+<h3 id="4-reference"><a href="#4-reference" class="headerlink" title="4.reference"></a>4.reference</h3><p><a target="_blank" rel="noopener" href="https://github.com/cncamp/101/blob/master/1.1.kubeadmin-setup.md">https://github.com/cncamp/101/blob/master/1.1.kubeadmin-setup.md</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.huaweicloud.com/articles/017d7a3301374d34161fdeb246d503ed.html">https://www.huaweicloud.com/articles/017d7a3301374d34161fdeb246d503ed.html</a></p>
+<p><a target="_blank" rel="noopener" href="http://liubin.org/blog/2021/01/28/install-old-version-k8s/">http://liubin.org/blog/2021/01/28/install-old-version-k8s/</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43168190/article/details/107227626?utm_medium=distribute.pc_relevant_t0.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.base&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.base">https://blog.csdn.net/weixin_43168190/article/details/107227626?utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.base&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.base</a></p>
+<hr>
+<h2 id="kind（mac）"><a href="#kind（mac）" class="headerlink" title="kind（mac）"></a>kind（mac）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brew install kind</span><br><span class="line">kind create cluster</span><br><span class="line">Reference: https://kind.sigs.k8s.io/docs/user/quick-start/#installation</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="docker-desktop（mac）"><a href="#docker-desktop（mac）" class="headerlink" title="docker desktop（mac）"></a>docker desktop（mac）</h2><p><a target="_blank" rel="noopener" href="https://github.com/AliyunContainerService/k8s-for-docker-desktop">https://github.com/AliyunContainerService/k8s-for-docker-desktop</a></p>
+<p><img src="https://i.loli.net/2021/08/15/iWkxzt4OlEpRf1A.png" alt="20210815192755"></p>
+<p>可以看到我们有 多个context</p>
+<h2 id="kubectl-config-use-context-docker-desktop-切换-context"><a href="#kubectl-config-use-context-docker-desktop-切换-context" class="headerlink" title="kubectl config use-context docker-desktop 切换 context"></a><code>kubectl config use-context docker-desktop</code> 切换 context</h2><h2 id="vagrant-file-一键启动集群"><a href="#vagrant-file-一键启动集群" class="headerlink" title="vagrant file 一键启动集群"></a>vagrant file 一键启动集群</h2><p>文档 <a target="_blank" rel="noopener" href="https://jimmysong.io/kubernetes-handbook/cloud-native/cloud-native-local-quick-start.html">https://jimmysong.io/kubernetes-handbook/cloud-native/cloud-native-local-quick-start.html</a></p>
+<p>源码 <a target="_blank" rel="noopener" href="https://github.com/rootsongjc/kubernetes-vagrant-centos-cluster">https://github.com/rootsongjc/kubernetes-vagrant-centos-cluster</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://litao-2071.github.io/blog/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/">https://litao-2071.github.io/blog/2021/06/30/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://litao-2071.github.io/blog" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/k8s/">k8s</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/06/30/%E5%B7%A5%E5%85%B7/%E8%BF%90%E7%BB%B4/vagrant/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">vagrant 基本概念和常用命令</div></div></a></div><div class="next-post pull-right"><a href="/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql-%E5%AF%86%E7%A0%81%E9%97%AE%E9%A2%98/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">mysql-密码问题</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相關推薦</span></div><div class="relatedPosts-list"><div><a href="/blog/2021/06/30/云原生/k8s-核心概念/" title="k8s 核心概念"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-30</div><div class="title">k8s 核心概念</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/profile.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">36</div></a></div><div class="card-info-data-item is-center"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">23</div></a></div><div class="card-info-data-item is-center"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/litao-2071/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/litao-2071/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-k8s%E9%9B%86%E7%BE%A4%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">安装 k8s集群的几种方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%8F"><span class="toc-number">1.1.</span> <span class="toc-text">序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#minikube%EF%BC%88mac%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">minikube（mac）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85docker"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.安装docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.安装虚拟机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEminikube"><span class="toc-number">1.2.3.</span> <span class="toc-text">3.安装配置minikube</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AE%89%E8%A3%85kubectl"><span class="toc-number">1.2.4.</span> <span class="toc-text">4.安装kubectl</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-reference"><span class="toc-number">1.2.5.</span> <span class="toc-text">5.reference</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kubeadm-ubuntu"><span class="toc-number">1.3.</span> <span class="toc-text">kubeadm (ubuntu)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%AE%BE%E7%BD%AE%E5%AD%98%E5%82%A8%E5%BA%93"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.设置存储库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%8B%E8%BD%BDdocker%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.下载docker引擎</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%9D%E5%A7%8B%E5%8C%96k8s"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.初始化k8s</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-reference"><span class="toc-number">1.3.4.</span> <span class="toc-text">4.reference</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kind%EF%BC%88mac%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">kind（mac）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker-desktop%EF%BC%88mac%EF%BC%89"><span class="toc-number">1.5.</span> <span class="toc-text">docker desktop（mac）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kubectl-config-use-context-docker-desktop-%E5%88%87%E6%8D%A2-context"><span class="toc-number">1.6.</span> <span class="toc-text">kubectl config use-context docker-desktop 切换 context</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#vagrant-file-%E4%B8%80%E9%94%AE%E5%90%AF%E5%8A%A8%E9%9B%86%E7%BE%A4"><span class="toc-number">1.7.</span> <span class="toc-text">vagrant file 一键启动集群</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/08/12/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E9%95%9C%E5%83%8F/" title="無題"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="無題"/></a><div class="content"><a class="title" href="/blog/2021/08/12/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E9%95%9C%E5%83%8F/" title="無題">無題</a><time datetime="2021-08-12T15:35:14.359Z" title="發表於 2021-08-12 23:35:14">2021-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/08/09/hexo_qiuck_start/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/blog/2021/08/09/hexo_qiuck_start/" title="Hello World">Hello World</a><time datetime="2021-08-09T12:42:52.880Z" title="發表於 2021-08-09 20:42:52">2021-08-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F/" title="备忘录模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="备忘录模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F/" title="备忘录模式">备忘录模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B/" title="架构的演进"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="架构的演进"/></a><div class="content"><a class="title" href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B/" title="架构的演进">架构的演进</a><time datetime="2021-07-17T08:17:00.000Z" title="發表於 2021-07-17 16:17:00">2021-07-17</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'litao-2071/blog')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
