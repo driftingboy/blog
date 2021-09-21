@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>prometheus 基础与最佳实践 | ATouch</title><meta name="keywords" content="prometheus,监控"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍prometheus基本概念，介绍指标的最佳实践">
+<meta property="og:type" content="article">
+<meta property="og:title" content="prometheus 基础与最佳实践">
+<meta property="og:url" content="https://driftingboy.github.io/blog/2021/07/17/%E4%BA%91%E5%8E%9F%E7%94%9F/prometheus%E5%9F%BA%E7%A1%80%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="介绍prometheus基本概念，介绍指标的最佳实践">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-07-17T08:17:00.000Z">
+<meta property="article:modified_time" content="2021-09-20T06:57:31.084Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="prometheus">
+<meta property="article:tag" content="监控">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="https://driftingboy.github.io/blog/2021/07/17/%E4%BA%91%E5%8E%9F%E7%94%9F/prometheus%E5%9F%BA%E7%A1%80%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'prometheus 基础与最佳实践',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-09-20 14:57:31'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">41</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/blog/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">prometheus 基础与最佳实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-07-17T08:17:00.000Z" title="發表於 2021-07-17 16:17:00">2021-07-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2021-09-20T06:57:31.084Z" title="更新於 2021-09-20 14:57:31">2021-09-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="prometheus 基础与最佳实践"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="prometheus"><a href="#prometheus" class="headerlink" title="prometheus"></a>prometheus</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Prometheus是一个开源的完整监控解决方案，其高效、可拓展、易于集成，是继k8s后第二个第二个加入<code>CNCF</code>基金会的项目。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="https://i.loli.net/2021/09/19/IeZRBVrYMdKTPAW.png" alt="20210919114008"></p>
+<ul>
+<li><code>prometheus server</code> 主要用来拉取存储指标数据,可以通过配置或服务发现</li>
+<li><code>promQL</code> 是用于对数据的查询，可以通过web界面或者http接口查询</li>
+<li><code>push gateway</code> 用于支持数据推送，但prometheus更提倡 pull的模式</li>
+<li><code>Alter manager</code> 用于发送警告</li>
+</ul>
+<h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><p>它既适合以机器为中心的<code>监控</code>，也适合监控高度动态的面向服务的架构。在微服务的世界中，它对多维数据收集和查询的支持是一个特殊的优势。prometheus是可靠的，你可以用它来分析，监控系统是否出现问题。</p>
+<p>但是prometheus不能保证 %100的准确性，在一些场景如：<code>按请求计费</code>等不适合使用;就像刚开始所说的它适合作为<code>资源的监控</code>（当然如果是按资源用量的粗力度计费是可以的）</p>
+<h2 id="与其他中间件的对比"><a href="#与其他中间件的对比" class="headerlink" title="与其他中间件的对比"></a>与其他中间件的对比</h2><p><img src="https://i.loli.net/2021/09/20/RoM6IGLDk8yqr7s.png" alt="20210920144128"><br>总结一下：<br><code>influxdb</code>在以下场景更适合：</p>
+<ol>
+<li>有事件记录的情况（ TSM对于更适合事件记录）</li>
+<li>商业版提供集群，更适合长期存储数据</li>
+</ol>
+<p><code>prometheus</code>在一下场景更适合：</p>
+<ol>
+<li>主要做指标，监控服务、资源情况。</li>
+<li>需要更强大的查询语言、警报和通知功能。</li>
+<li>需要图形和警报的更高可用性和正常运行时间</li>
+</ol>
+<p>当然<code>prometheus和influxdb</code>常常会结合使用,比如如下一个计费系统：</p>
+<p><img src="https://i.loli.net/2021/09/20/gSJxRpB9HLOzCad.png" alt="20210920144904"><br>在一个云平台，我们需要按照租户使用的资源情况、api的请求情况来统一计费的话，可以使用 <code>telegraf</code> 自动拉取 <code>prometheus收集的指标、服务主动推送的event</code>，最后存储在 influxdb。</p>
+<p>这样即可以通过prometheus方便的获取当前资源占用情况，也可以对 api的请求时产生的event有很好的支持;</p>
+<p>数据最终也存储在更适合长时间存储的influxdb;</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="时间序列"><a href="#时间序列" class="headerlink" title="时间序列"></a>时间序列</h3><p>Prometheus会将所有采集到的样本数据以时间序列（time-series）的方式保存在内存数据库中，并且定时保存到硬盘上。每条time-series通过指标名称(metrics name)和一组标签集(labelset)命名。如下所示，可以将time-series理解为一个以时间为Y轴的数字矩阵, 随着时间推移，每条time-series都会收集数据样本.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">^</span><br><span class="line">│   . . . . . . . . . . . . . . . . .   . .   node_cpu&#123;cpu=&quot;cpu0&quot;,mode=&quot;idle&quot;&#125;</span><br><span class="line">│     . . . . . . . . . . . . . . . . . . .   node_cpu&#123;cpu=&quot;cpu0&quot;,mode=&quot;system&quot;&#125;</span><br><span class="line">│     . . . . . . . . . .   . . . . . . . .   node_load1&#123;&#125;</span><br><span class="line">│     . . . . . . . . . . . . . . . .   . .  </span><br><span class="line">v</span><br><span class="line">  &lt;------------------ 时间 ----------------&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="样本"><a href="#样本" class="headerlink" title="样本"></a>样本</h3><p>上图中的每一个点就是一个数据样本，样本由以下三部分组成：</p>
+<ul>
+<li>指标(metric)：metric name和描述当前样本特征的labelsets;</li>
+<li>时间戳(timestamp)：一个精确到毫秒的时间戳;</li>
+<li>样本值(value)： 一个float64的浮点型数据表示当前样本的值。</li>
+</ul>
+<p>描述了在这个时间点产生的数据（时间戳+样本值），以及这个数据属于哪个时间序列(指标)</p>
+<p>样本的格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;=&lt;label value&gt;, ...&#125;</span><br><span class="line"></span><br><span class="line">&lt;--------------- metric ---------------------&gt;&lt;-timestamp -&gt;&lt;-value-&gt;</span><br><span class="line">http_request_total&#123;status=&quot;200&quot;, method=&quot;GET&quot;&#125;@1434417560938 =&gt; 94355</span><br><span class="line">http_request_total&#123;status=&quot;200&quot;, method=&quot;GET&quot;&#125;@1434417561287 =&gt; 94334</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="监控类型"><a href="#监控类型" class="headerlink" title="监控类型"></a>监控类型</h2><h3 id="Counter：只增不减的计数器"><a href="#Counter：只增不减的计数器" class="headerlink" title="Counter：只增不减的计数器"></a>Counter：只增不减的计数器</h3><p>counter类型的指标，适合只增不减的场景，如请求总量，一般命名为<br><code>http_requests_total</code>,以total结尾。</p>
+<p>prometheus 提供 rate、topK等聚合分析函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">topk(10, http_requests_total)</span><br></pre></td></tr></table></figure>
+<h3 id="Gauge-可增可减的仪表盘"><a href="#Gauge-可增可减的仪表盘" class="headerlink" title="Gauge: 可增可减的仪表盘"></a>Gauge: 可增可减的仪表盘</h3><p>Gauge类型的指标侧重于反应系统的当前状态，比如：node_memory_MemFree（主机当前空闲的内容大小）、node_memory_MemAvailable（可用内存大小）。</p>
+<h3 id="Histogram和Summary：-分析数据分布情况"><a href="#Histogram和Summary：-分析数据分布情况" class="headerlink" title="Histogram和Summary： 分析数据分布情况"></a>Histogram和Summary： 分析数据分布情况</h3><p>主用用于统计和分析样本的分布情况，如：统计延迟在0<del>10ms之间的请求数有多少而10</del>20ms之间的请求数又有多少。</p>
+<h2 id="metrics最佳实践（监控模式）"><a href="#metrics最佳实践（监控模式）" class="headerlink" title="metrics最佳实践（监控模式）"></a>metrics最佳实践（监控模式）</h2><p>监控有着一些模式，最佳实践</p>
+<h3 id="黄金法则"><a href="#黄金法则" class="headerlink" title="黄金法则"></a>黄金法则</h3><p>Four Golden Signals是Google针对大量分布式监控的经验总结，4个黄金指标可以在服务级别帮助衡量终端用户体验、服务中断、业务影响等层面的问题。主要关注与以下四种类型的指标：<code>延迟，通讯量，错误以及饱和度</code>：</p>
+<ul>
+<li><p>延迟：服务请求所需时间。<br>记录用户所有请求所需的时间，重点是要区分成功请求的延迟时间和失败请求的延迟时间。 例如在数据库或者其他关键祸端服务异常触发HTTP 500的情况下，用户也可能会很快得到请求失败的响应内容，如果不加区分计算这些请求的延迟，可能导致计算结果与实际结果产生巨大的差异。除此以外，在微服务中通常提倡“快速失败”，开发人员需要特别注意这些延迟较大的错误，因为这些缓慢的错误会明显影响系统的性能，因此追踪这些错误的延迟也是非常重要的。</p>
+</li>
+<li><p>通讯量：监控当前系统的流量，用于衡量服务的容量需求。<br>流量对于不同类型的系统而言可能代表不同的含义。例如，在HTTP REST API中, 流量通常是每秒HTTP请求数；</p>
+</li>
+<li><p>错误：监控当前系统所有发生的错误请求，衡量当前系统错误发生的速率。<br>对于失败而言有些是显式的(比如, HTTP 500错误)，而有些是隐式(比如，HTTP响应200，但实际业务流程依然是失败的)。<br>对于一些显式的错误如HTTP 500可以通过在负载均衡器(如Nginx)上进行捕获，而对于一些系统内部的异常，则可能需要直接从服务中添加钩子统计并进行获取。</p>
+</li>
+<li><p>饱和度：衡量当前服务的饱和度。<br>主要强调最能影响服务状态的受限制的资源。 例如，如果系统主要受内存影响，那就主要关注系统的内存状态，如果系统主要受限与磁盘I/O，那就主要观测磁盘I/O的状态。因为通常情况下，当这些资源达到饱和后，服务的性能会明显下降。同时还可以利用饱和度对系统做出预测，比如，“磁盘是否可能在4个小时候就满了”。</p>
+</li>
+</ul>
+<h3 id="USE和RED"><a href="#USE和RED" class="headerlink" title="USE和RED"></a>USE和RED</h3><p><code>USE</code>: 主要用来监控系统的资源，资源主要包括但不限于：CPU，内存，网络，磁盘等等。监控的指标如下：</p>
+<ul>
+<li>使用率(Utilization) 100%的使用率通常是系统性能瓶颈的标志。</li>
+<li>饱和度(Saturation) 例如CPU的平均运行排队长度，任何资源在某种程度上的饱和都可能导致系统性能的下降。</li>
+<li>错误(Errors) 错误计数。例如：”网卡在数据包传输过程中检测到的以太网网络冲突了14次”。</li>
+</ul>
+<p><code>RED</code>: 用于监控微服务应用下的用户体验</p>
+<ul>
+<li>(请求)速率：服务每秒接收的请求数。</li>
+<li>(请求)错误：每秒失败的请求数。</li>
+<li>(请求)耗时：每个请求的耗时。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://driftingboy.github.io/blog/2021/07/17/%E4%BA%91%E5%8E%9F%E7%94%9F/prometheus%E5%9F%BA%E7%A1%80%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">https://driftingboy.github.io/blog/2021/07/17/%E4%BA%91%E5%8E%9F%E7%94%9F/prometheus%E5%9F%BA%E7%A1%80%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://driftingboy.github.io/blog" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/prometheus/">prometheus</a><a class="post-meta__tags" href="/blog/tags/%E7%9B%91%E6%8E%A7/">监控</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E8%AE%A1%E8%B4%B9%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">计费系统设计</div></div></a></div><div class="next-post pull-right"><a href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">微服务系统安全</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/profile.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">41</div></a></div><div class="card-info-data-item is-center"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/driftingboy/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/driftingboy/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#prometheus"><span class="toc-number">1.</span> <span class="toc-text">prometheus</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">1.2.</span> <span class="toc-text">架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.3.</span> <span class="toc-text">适用场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8E%E5%85%B6%E4%BB%96%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">1.4.</span> <span class="toc-text">与其他中间件的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.5.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97"><span class="toc-number">1.5.1.</span> <span class="toc-text">时间序列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B7%E6%9C%AC"><span class="toc-number">1.5.2.</span> <span class="toc-text">样本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.6.</span> <span class="toc-text">监控类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Counter%EF%BC%9A%E5%8F%AA%E5%A2%9E%E4%B8%8D%E5%87%8F%E7%9A%84%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="toc-number">1.6.1.</span> <span class="toc-text">Counter：只增不减的计数器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Gauge-%E5%8F%AF%E5%A2%9E%E5%8F%AF%E5%87%8F%E7%9A%84%E4%BB%AA%E8%A1%A8%E7%9B%98"><span class="toc-number">1.6.2.</span> <span class="toc-text">Gauge: 可增可减的仪表盘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Histogram%E5%92%8CSummary%EF%BC%9A-%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83%E6%83%85%E5%86%B5"><span class="toc-number">1.6.3.</span> <span class="toc-text">Histogram和Summary： 分析数据分布情况</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#metrics%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%88%E7%9B%91%E6%8E%A7%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="toc-number">1.7.</span> <span class="toc-text">metrics最佳实践（监控模式）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%BB%84%E9%87%91%E6%B3%95%E5%88%99"><span class="toc-number">1.7.1.</span> <span class="toc-text">黄金法则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#USE%E5%92%8CRED"><span class="toc-number">1.7.2.</span> <span class="toc-text">USE和RED</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/08/09/hexo_qiuck_start/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/blog/2021/08/09/hexo_qiuck_start/" title="Hello World">Hello World</a><time datetime="2021-08-09T12:42:52.880Z" title="發表於 2021-08-09 20:42:52">2021-08-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F/" title="备忘录模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="备忘录模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F/" title="备忘录模式">备忘录模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="命令模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式">命令模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B/" title="架构的演进"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="架构的演进"/></a><div class="content"><a class="title" href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B/" title="架构的演进">架构的演进</a><time datetime="2021-07-17T08:17:00.000Z" title="發表於 2021-07-17 16:17:00">2021-07-17</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'driftingboy/blog')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
