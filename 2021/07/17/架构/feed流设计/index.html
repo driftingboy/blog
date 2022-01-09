@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>feed流设计分析与建议 | ATouch</title><meta name="keywords" content="架构,微服务"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="feed流设计分析与建议，推拉结合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="feed流设计分析与建议">
+<meta property="og:url" content="https://driftingboy.github.io/blog/2021/07/17/%E6%9E%B6%E6%9E%84/feed%E6%B5%81%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="feed流设计分析与建议，推拉结合">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-07-17T08:17:00.000Z">
+<meta property="article:modified_time" content="2022-01-09T08:18:08.886Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="微服务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="https://driftingboy.github.io/blog/2021/07/17/%E6%9E%B6%E6%9E%84/feed%E6%B5%81%E8%AE%BE%E8%AE%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'feed流设计分析与建议',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2022-01-09 16:18:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/blog/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">feed流设计分析与建议</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-07-17T08:17:00.000Z" title="發表於 2021-07-17 16:17:00">2021-07-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2022-01-09T08:18:08.886Z" title="更新於 2022-01-09 16:18:08">2022-01-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E6%9E%B6%E6%9E%84/">架构</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="feed流设计分析与建议"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>参考资料</p>
+<ol>
+<li>链接：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19645686/answer/30086587">https://www.zhihu.com/question/19645686/answer/30086587</a></li>
+</ol>
+<p>简单来说，Feeds这块主要包括两块内容，就是生成feeds和更新feeds。生成feeds是什么意思呢，比如我们已经关注的人做了特定操作，我们需要把这些活动加入你的feeds，让你接收到。更新feeds包括的内容比较多，一种就是你关注点做了更新，比如你新关注了一个人，需要把他的活动加入已有feeds，与此类似，取消关注也一样；另一种就是你的关注点做了一些更新操作，比如你关注的一个人取消关注了一个问题。我们先来谈feeds生成，用户A做了某操作，比如关注了一个问题，这时候我们首先找到用户A的所有关注者，然后给需要推送的关注者推送此操作，大家可以把每个人的feeds简单想象为一个有序列表，推送很简单，就是在每个人的列表末尾添加这个操作。怎么样，是不是很简单，:)然后我们谈feeds更新，第一种情况和第二种情况其实都是一样的，我们需要针对这些活动更新来更新feeds，比如我们新关注了一个人，这时候我们需要取出此人的活动历史，然后按照时间顺序把这些历史塞到你的feeds中。此操作的复杂度会比较高，需要使用合适的数据结构来达到最佳性能，目前是O(log(N))。</p>
+<p>当然，真实情况并没有这么简单，还有很多其他逻辑和注意点，比如我们的feeds需要对多人做同样的操作做合并（大家可以自行把以上的feeds有序列表变为有序集合），同样的内容的创建时间是要按最新操作的时间来计算的，一个人连续做很多操作需要对操作做合并等。</p>
+<p>所有大家看到的feeds相应的存储考虑到性能都会使用内存，除此之外所有的操作都需要做持久化存储，否则我们也就没法更新feeds了:)下面我们谈谈这里面的技术挑战和相关技术，此部分与知乎目前的技术决策和使用技术无关，我给大家分享几个国外团队的工程决策和他们的优化手段。先来谈谈strava，他们使用了Kafka分布式发布订阅消息系统，这个系统用来事件(event)发布，还使用了Storm分布式实时计算平台，这个计算集群会订阅Kafka的事件，然后完成相应的处理，在这块他们做了一个优化，就是一个事件不会推给所有关注者，只会推给活跃的用户（如何判定一个用户为活跃的，这就看实际情况和数据自己优化了）。</p>
+<p>然后再来谈谈Instagram，他们产品的读写比例达到了100：1，事实上大部分互联网产品都是这样，所以这也是推技术更合适的原因，推一次开销可能大一点，不过推（也就是写）发生次数大大少于读，因为有些大牛关注者非常多，达到几百上千万，为了进行可靠地推，这个过程都会异步后台执行。同样，我们需要一个任务调度器和消息队列，任务调度他们选用了Celery，下面需要选择一个消息队列，Redis依赖订阅者轮询，不自带复制备份，而且强依赖内存是个硬伤，不合适；Beanstalk其他方面不错，可还是不支持复制(Replication)，弃掉；最后他们选用了RabbitMQ，快，高效，支持复制，而且和Celery高度兼容。接着谈谈Pinterest，重心在于创建一个智能化的feed，也就是feed会包括一些热点和推荐，而且会根据特定算法来排序。当事件发生后，会经过一系列流程最后才进入用户的内容feed，首先经过智能feed worker来处理，这些worker会接收事件而且根据特定用户给事件打分，然后这些事件会被插入到一个排好序的feed池中，不同类型的事件会被插入各自的池中，目前他们使用HBase的基于key的排序实现了此优先队列，接着智能feed内容生成器接手了，它会从几个池中根据策略取出feeds甚至剔除一些feeds，最后面向用户的智能feed服务会整合旧的feed和新生成的feed，展现给用户看到的Home Feeds。最后简单谈谈Facebook，用户量大了之后对工程团队要求会更高，每个facebook用户都会有一个属于自己的独一无二的动态生成的首页。很多团队都会用用户ID为Key来把feeds存入Key-Value存储系统，比如Redis，问题是通过网络连接做远程过程调用非常慢，无法满足实时性的要求，所以facebook团队也开始使用了嵌入式数据库，他们也开源了自己在用的RocksDB。</p>
+<p>这些内容都在他们的技术博客里面有提到，链接在这里：Strava EngineeringHow Instagram Feeds Work: Celery and RabbitMQMaking Pinterest<a target="_blank" rel="noopener" href="https://www.facebook.com/notes/10151822347683920/%E5%B0%B1%E5%83%8F%E7%94%B5%E5%BD%B1%E7%89%B9%E6%95%88%E6%98%AF%E4%B8%BA%E5%89%A7%E6%83%85%E6%9C%8D%E5%8A%A1%E4%B8%80%E6%A0%B7%EF%BC%8C%E6%8A%80%E6%9C%AF%E6%98%AF%E4%B8%BA%E4%BA%A7%E5%93%81%E6%9C%8D%E5%8A%A1%E7%9A%84%E3%80%82%E9%92%88%E5%AF%B9%E4%B8%8D%E5%90%8C%E7%9A%84%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF%EF%BC%8C%E9%80%82%E5%90%88%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%9F%E6%98%AF%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E3%80%82%E9%9A%8F%E7%9D%80%E4%BA%A7%E5%93%81%E7%9A%84%E8%B0%83%E6%95%B4%E5%92%8C%E4%B8%9A%E5%8A%A1%E8%A7%84%E6%A8%A1%E7%9A%84%E6%89%A9%E5%A4%A7%EF%BC%8C%E7%9B%B8%E5%BA%94%E7%9A%84%E6%8A%80%E6%9C%AF%E9%83%BD%E4%BC%9A%E5%81%9A%E8%BF%9B%E5%8C%96%E5%92%8C%E8%B0%83%E6%95%B4%E3%80%82%E9%92%88%E5%AF%B9%E4%B8%8D%E5%90%8C%E7%9A%84%E9%9A%BE%E9%A2%98%EF%BC%8C%E9%9C%80%E8%A6%81%E6%8F%90%E5%87%BA%E4%B8%8D%E5%90%8C%E7%9A%84%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88%EF%BC%8Cfeeds%E7%9A%84%E7%94%9F%E6%88%90%E4%B9%9F%E6%98%AF%E8%BF%99%E6%A0%B7%EF%BC%8C%E5%A6%82%E6%9E%9C%E6%9C%89%E5%BF%85%E8%A6%81%EF%BC%8C%E6%88%91%E4%BB%AC%E4%B9%9F%E4%BC%9A%E5%AF%B9%E8%BF%99%E4%BA%9B%E6%96%B9%E6%A1%88%E5%81%9A%E8%B0%83%E6%95%B4%EF%BC%8C%E7%9B%AE%E7%9A%84%E9%83%BD%E6%98%AF%E4%B8%80%E6%A0%B7%EF%BC%8C%E9%82%A3%E5%B0%B1%E6%98%AF%E5%8F%88%E5%AF%B9%E5%8F%88%E5%BF%AB%E5%8F%88%E7%A8%B3%E5%AE%9A%E3%80%82">https://www.facebook.com/notes/10151822347683920/就像电影特效是为剧情服务一样，技术是为产品服务的。针对不同的业务场景，适合的技术也是不一样的。随着产品的调整和业务规模的扩大，相应的技术都会做进化和调整。针对不同的难题，需要提出不同的技术方案，feeds的生成也是这样，如果有必要，我们也会对这些方案做调整，目的都是一样，那就是又对又快又稳定。</a></p>
+<ol start="2">
+<li>链接：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19645686/answer/30086587">https://www.zhihu.com/question/19645686/answer/30086587</a></li>
+</ol>
+<p><span class="RichText ztext CopyrightRichText-richText css-hnrfcf" options="[object Object]" itemprop="text"><p data-pid="BSs3d3qJ">刚好最近想写一个Feed机制的文章，就来回答一下吧。</p><p data-pid="XG-JGIy4">楼上各位其实把大体的情况都已经说的很明白了，我来分享一下我们目前线上一个feed实现机制，已经在生产环境运行了大半年。理论来说，百万级别用户没有什么问题。</p><p data-pid="2Tg0P0v_">为了节省大家流量，全程无图（其实是我懒得画 - - ），希望大家能把省下的流量钱来给我发红包，鼓掌 。</p><p data-pid="TL2GCubn">首先，抛去数据库这一块，数据库我想大家肯定知道怎么设计，但是查询肯定是个麻烦事， 所以我使用了redis进行一个冗余设计，开始介绍之前，需要了解什么是推拉模式，楼上说的两篇文章  </p><a href="https://link.zhihu.com/?target=http%3A//blog.sina.com.cn/s/blog_53b95aec0100ujim.html" class=" wrap external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043">新浪微博架构和FEED架构分析–人人架构_paper0023_新浪博客</a><p data-pid="zVSBgUqu"> ，还有推拉模式以及时间分区拉模式的分析 </p><a href="https://link.zhihu.com/?target=http%3A//www.cnblogs.com/sunli/archive/2010/08/24/twitter_feeds_push_pull.html" class=" wrap external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043">微博feed系统的推(push)模式和拉(pull)模式和时间分区拉模式架构探讨</a><p data-pid="0HbTPUnN"> 其实已经足够了解了，请各位看官如果未对推拉模式了解，那么请先看文章，再来看我的回答，我的回答只是阐述具体实现，谢谢。</p><p data-pid="ZAXRPfVd">那么我现在说一下redis这块怎么来完成推拉模式，以及内存尽可能节省，速度尽可能提高吧（当然，只是我理解的节省内存跟速度提高，如果看官们有其他的意见，我就两点要求，一、轻喷，二、说完再喷）。</p><p data-pid="uSKTajdI"><b>1、实现</b></p><p data-pid="RQcTB2IC">首先，先解决发布跟接收的问题，目前有大体以下几种方式：</p><p data-pid="d9X6tXBE">1、推模式</p><p data-pid="hb8F7h05">什么是推模式？推模式就是，用户A关注了用户B，用户B每发送一个动态，后台遍历用户B的粉丝，往他们粉丝的feed里面推送一条动态。 </p><p data-pid="SfARUcUt">2、拉模式</p><p data-pid="PaXFLXk-">与推模式相反，拉模式则是，用户每次刷新feed第一页，都去遍历关注的人，把最新的动态拉取回来。</p><p data-pid="2pJR-CNk">但是，不管推模式还是拉模式都存在若关注数量或者粉丝数量过多，导致遍历时间太长的问题，怎么去解决 ？这里就出现了第三种模式，推拉模式。</p><p data-pid="U_K0PZnW">3、推拉模式</p><p data-pid="sXdJ9BRw">这是一种折中的解决方案，就是在线推，离线拉。粉丝几百上千万， 跟你发布动态同时在线的肯定也就只有那么顶天几百几千几万，何况这类大V很少，只推给在线的粉丝，离线的粉丝上线后，再去拉取动态即可！但是，不管是什么模式，每个用户都会维护一个类似发件箱跟收件箱的东西，保存自己发过的动态以及Feed动态（具体实现看下面），来完成推与拉。</p><p data-pid="p14J2_rb">而这里讲的，肯定就是推拉模式，用户A关注了用户B ， 用户B发布动态则将动态推进用户A的feed，这里使用redis的zset实现，sort为time（记得以毫秒为时间戳，<span><a data-za-not-track-link="true" href="https://www.zhihu.com/search?q=%E7%A7%92%E7%BA%A7&amp;search_source=Entity&amp;hybrid_search_source=Entity&amp;hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A85075806%7D" target="_blank" class="css-1occaib">秒级<svg width="8px" height="8px" viewBox="0 0 15 15" class="css-ukqak1"><path d="M10.89 9.477l3.06 3.059a1 1 0 0 1-1.414 1.414l-3.06-3.06a6 6 0 1 1 1.414-1.414zM6 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"></path></svg></a></span>在数据量达到一定程度后，会有读取不到的问题，比如以<span><a data-za-not-track-link="true" href="https://www.zhihu.com/search?q=%E6%97%B6%E9%97%B4%E6%88%B3&amp;search_source=Entity&amp;hybrid_search_source=Entity&amp;hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A85075806%7D" target="_blank" class="css-1occaib">时间戳<svg width="8px" height="8px" viewBox="0 0 15 15" class="css-ukqak1"><path d="M10.89 9.477l3.06 3.059a1 1 0 0 1-1.414 1.414l-3.06-3.06a6 6 0 1 1 1.414-1.414zM6 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"></path></svg></a></span>为分页页码），value为具体的动态 ID（为什么是动态ID， 其实很简单， 就是因为动态的内容可以进行缓存，在redis里面全部走ID，修改动态内容也需要修改一处，动态内容可以保存在<span><a data-za-not-track-link="true" href="https://www.zhihu.com/search?q=hash%E7%BB%93%E6%9E%84&amp;search_source=Entity&amp;hybrid_search_source=Entity&amp;hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A85075806%7D" target="_blank" class="css-1occaib">hash结构<svg width="8px" height="8px" viewBox="0 0 15 15" class="css-ukqak1"><path d="M10.89 9.477l3.06 3.059a1 1 0 0 1-1.414 1.414l-3.06-3.06a6 6 0 1 1 1.414-1.414zM6 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"></path></svg></a></span>里）， 每个用户维护一个zset保存我发布的动态，一个zset保存我的feed动态，过期时间3<del>7天看情况而定。为什么要设计过期时间后面会细说。</p><p data-pid="g9JhjcoE">OK，全局维护一个在线<span><a data-za-not-track-link="true" href="https://www.zhihu.com/search?q=%E7%94%A8%E6%88%B7%E5%88%97%E8%A1%A8&amp;search_source=Entity&amp;hybrid_search_source=Entity&amp;hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A85075806%7D" target="_blank" class="css-1occaib">用户列表<svg width="8px" height="8px" viewBox="0 0 15 15" class="css-ukqak1"><path d="M10.89 9.477l3.06 3.059a1 1 0 0 1-1.414 1.414l-3.06-3.06a6 6 0 1 1 1.414-1.414zM6 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"></path></svg></a></span>，怎么设计这个就自己琢磨了，为了防止用户挂后台导致与服务端为离线状态，所以最好是1</del>3小时未操作或者离线时间不大于3小时的，都当做在线处理，反正这个看情况定。</p><p data-pid="4MOmwfi_">那么，当用户发了一条动态后，后台会有以下这些操作：</p><p data-pid="Kl_ld6tL">在线推： 异步遍历在线的粉丝，将动态ID，添加到粉丝的Feed中。</p><p data-pid="mlPLktpo">离线拉： 离线用户打开APP后，我们是会请求一个公共的入口接口，主做统计以及其他初始化操作，在这里，我们也开了一个<span><a data-za-not-track-link="true" href="https://www.zhihu.com/search?q=%E5%BC%82%E6%AD%A5%E7%BA%BF%E7%A8%8B&amp;search_source=Entity&amp;hybrid_search_source=Entity&amp;hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A85075806%7D" target="_blank" class="css-1occaib">异步线程<svg width="8px" height="8px" viewBox="0 0 15 15" class="css-ukqak1"><path d="M10.89 9.477l3.06 3.059a1 1 0 0 1-1.414 1.414l-3.06-3.06a6 6 0 1 1 1.414-1.414zM6 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"></path></svg></a></span>，对用户进行Feed更新操作，防止用户进入APP后等待拉取时间过长，毕竟关注成千上万的人肯定有（其实万单位以下遍历都很快）。拉取过程其实就是把自己最后一条Feed的时间戳取出，去遍历关注的人的feed，将大于该时间的ID全部拉取回来。用户进入APP后，刷新即可看到最新操作。</p><p data-pid="EbXj_Hu-">另：如果有Feed新消息数提示的需求，可以在推拉的同时进行增加， 刷新feed时清空即可。</p><p data-pid="7e52-YKt"><b>其实到这里，发布接收的问题已经解决了，那么有一个问题，用户feed里面过长，占用内存怎么办？</b></p><p data-pid="jkCkCp6v">我是这么处理的，一个用户的feed第一次拉取的时候，feed长度为500条，在我们APP里，相当于50页，而后的数据，都走数据库。大页码翻页其实就是个伪需求而且耗性能的东西，用户除了第一次用这个APP，才会翻到底，第一次使用， 能有几个动态 ？而对于二次使用以上的用户，一般来讲， 翻了几页就已经到达上一次看过的地方了，所以500条数据，在关注量一般的情况下，内容已经足够消费，甚至达到疲劳，可能有关注量很大的用户他的Feed每天可能有很多很多动态，但是，不用说，肯定是做广告的，关注一堆人等着回粉，这种人更不会去消费内容，50页的内容，翻起来都累。当然，并不是说放弃了这些人，feed找不到走数据库嘛~~~~爱走不走，想走就给我翻50页再说<del></p><p data-pid="JDLv09Ij"><b>还有一个问题，每个用户都维护自己的动态跟Feed队列，当用户上百万时，内存的占有量肯定不小，要怎么释放内存才合适 ？</b></p><p data-pid="wMr2STCy">这里就回到上面那个问题了，为什么要给feed的key设计过期时间？为什么是设计3</del>7天过期时间？</p><p data-pid="7Xtchlkq">原因有以下：</p><p data-pid="-PhM48iy">一、一个用户3<del>7天不打开APP，可能已经对APP失去兴趣了，打开几率很小，或者已经被卸载了，没有存在的意义了。</p><p data-pid="J0BW4QcJ">二、3</del>7天未登陆APP，关注的人发的动态也不少了，Feed未拉取回来的数据肯定也不少，那么这时候去遍历其实拉取量很大，那么还不如直接全部重新拉一边或者拉取用户最后登陆时间后产出的数据。</p><p data-pid="Gw_UBE_j">到这里，其实已经差不多了，大部分业务逻辑已经足够满足，并且速度也理想，目前我们线上这种模式走了半年，feed一般都是10~80ms响应完毕。</p><p data-pid="xfGn49Kw">好了，大概就是这样了。</p><p data-pid="0dFJ5l4F">最后说一句：</p><p data-pid="ZdbqS4Ws">&lt;?php </p><p data-pid="76FNubMS">     echo ‘php 是世界上最好的语言！！！’;</p><p data-pid="tVD45iWp">?&gt;</p></span></p>
+<ol start="3">
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/ifwinds/article/details/114585091">https://blog.csdn.net/ifwinds/article/details/114585091</a></li>
+</ol>
+<p>离线拉，在线推<br>如果是一些不重要的信息，可以长时间不登陆，只拉取最新<br>推送视情况只推送活跃用户</p>
+<p>对于订阅人数过多的话题，可以活跃用户推，非活跃用户拉；<br>所有的操作都是异步的，如果量很大，可以搞分布式并发，结合mq，redis集群等等</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://driftingboy.github.io/blog/2021/07/17/%E6%9E%B6%E6%9E%84/feed%E6%B5%81%E8%AE%BE%E8%AE%A1/">https://driftingboy.github.io/blog/2021/07/17/%E6%9E%B6%E6%9E%84/feed%E6%B5%81%E8%AE%BE%E8%AE%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://driftingboy.github.io/blog" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/%E6%9E%B6%E6%9E%84/">架构</a><a class="post-meta__tags" href="/blog/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/pull%E8%BF%98%E6%98%AFpush/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">推模型还是拉模型</div></div></a></div><div class="next-post pull-right"><a href="/blog/2021/07/17/%E6%9E%B6%E6%9E%84/%E5%A4%9A%E7%A7%9F%E6%88%B7/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">多租户系统设计</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相關推薦</span></div><div class="relatedPosts-list"><div><a href="/blog/2021/07/17/架构/架构的演进/" title="架构的演进"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-17</div><div class="title">架构的演进</div></div></a></div><div><a href="/blog/2021/07/17/架构/计费系统架构/" title="计费系统设计"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-17</div><div class="title">计费系统设计</div></div></a></div><div><a href="/blog/2021/07/17/架构/系统安全/" title="微服务系统安全"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-17</div><div class="title">微服务系统安全</div></div></a></div><div><a href="/blog/2021/07/17/架构/pull还是push/" title="推模型还是拉模型"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-17</div><div class="title">推模型还是拉模型</div></div></a></div><div><a href="/blog/2021/07/17/架构/多租户/" title="多租户系统设计"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-17</div><div class="title">多租户系统设计</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/profile.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div><div class="card-info-data-item is-center"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div><div class="card-info-data-item is-center"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/driftingboy/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/driftingboy/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="docker文件系统"/></a><div class="content"><a class="title" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统">docker文件系统</a><time datetime="2021-10-04T08:17:00.000Z" title="發表於 2021-10-04 16:17:00">2021-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="容器实现原理"/></a><div class="content"><a class="title" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理">容器实现原理</a><time datetime="2021-09-30T08:17:00.000Z" title="發表於 2021-09-30 16:17:00">2021-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="golang atomic"/></a><div class="content"><a class="title" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic">golang atomic</a><time datetime="2021-09-21T08:17:00.000Z" title="發表於 2021-09-21 16:17:00">2021-09-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="命令模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式">命令模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'driftingboy/blog')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

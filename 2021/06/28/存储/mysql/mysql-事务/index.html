@@ -1,0 +1,231 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title> mysql-事务 | ATouch</title><meta name="keywords" content="mysql"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="mysql-事务详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content=" mysql-事务">
+<meta property="og:url" content="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="mysql-事务详解">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-06-28T08:17:00.000Z">
+<meta property="article:modified_time" content="2022-01-09T08:07:32.280Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E4%BA%8B%E5%8A%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: ' mysql-事务',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-01-09 16:07:32'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/blog/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title"> mysql-事务</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-06-28T08:17:00.000Z" title="發表於 2021-06-28 16:17:00">2021-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2022-01-09T08:07:32.280Z" title="更新於 2022-01-09 16:07:32">2022-01-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E5%AD%98%E5%82%A8/">存储</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=" mysql-事务"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="mysql-事务"><a href="#mysql-事务" class="headerlink" title="mysql-事务"></a>mysql-事务</h1><h2 id="什么是事务？"><a href="#什么是事务？" class="headerlink" title="什么是事务？"></a>什么是事务？</h2><p>事务是指将一系列操作看成一个原子操作，要么都成功，要么都失败。</p>
+<h2 id="事务的特性"><a href="#事务的特性" class="headerlink" title="事务的特性"></a>事务的特性</h2><h3 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h3><ul>
+<li>atomicity : 表示事务是原子的，要么都成功，要么都失败；innodb 中通过 undo log记录回滚日志，当有操作执行失败，之前执行的所有操作都会回滚</li>
+<li>consistency：事务的一致性指的是，执行后一定是最终状态，不会出现中间状态。</li>
+<li>isolation：事务与事务的数据隔离，具体的隔离程度要看隔离等级</li>
+<li>durability：执行的结果存储在磁盘中，不会丢失</li>
+</ul>
+<h3 id="隔离性"><a href="#隔离性" class="headerlink" title="隔离性"></a>隔离性</h3><p>这里着重介绍一下隔离性</p>
+<p>因为事务只是在逻辑上是一个原子操作，但是实际上，各个事务的子操作一般是并发执行，就涉及到并发安全的问题；这些问题具体来说就是一些，“脏读”、“幻读”等问题。</p>
+<p>那么越高的隔离级别，并发的问题就越少，比如</p>
+<ul>
+<li>读未提交：一个事务还没有提交，它做的变更就能被其他事务看到</li>
+<li>读已提交：一个事务已经提交，它做的变更才能被其他事务看到</li>
+<li>可重复读：一个事务看到的视图在它启动的那一刻就已经确定，基于这个视图进行变更；当然也是事务提交，变更才会被其他事务看到。</li>
+<li>串行化：对于一行记录读会加读锁，写会加写锁，也就是只允许并发读。</li>
+</ul>
+<p>Mysql默认的隔离级别是<strong>可重复读</strong></p>
+<p>可以通过如下语句，查看隔离级别</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;transaction_isolation&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/5BC96698-181D-4B2E-A7F1-883A728D4AC6/294C4723-DE79-4FDA-B294-FF146E6B6FCB_2/kJshByrKWmqdxp3SuXZChD2xU2SxYhiYQseEmlyLOOwz/Image.png" alt="Image.png"></p>
+<p>通过 ‘transaction_isolation’ 参数可以修改数据库的隔离级别。</p>
+<h2 id="隔离如何实现？"><a href="#隔离如何实现？" class="headerlink" title="隔离如何实现？"></a>隔离如何实现？</h2><p>Mysql中的事务由存储引擎实现，接下来的介绍都基于 <code>innodb</code> 中的可重复读隔离级别。</p>
+<p>我们都知道Mysql在变更数据（更新、插入、删除）时，会产生一条<code>redo log</code> ，记录数据页上的修改。除此之外<strong>，还会产生一条 <code>undo log</code> （回滚日志）</strong>，记录更改的逆操作，用做回滚。</p>
+<p>所以一条记录可以根据 undo log 回到上一个版本的状态，这样相当于一条记录在数据库中拥有多个版本，这就是 **::多版本并发控制（MVCC）。::**当然你也可以看出，这里的“版本”是指逻辑上的版本，每次获取需要根据 最新版本+ undo log 计算，并不是实际存在的。</p>
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/5BC96698-181D-4B2E-A7F1-883A728D4AC6/5727D1C0-F711-41B9-A1B9-8557068DFEF4_2/RYlIbQTyfDyPJkIu0YevKUOnYL3bdYrzTgCnYjaUQHkz/Image.png" alt="Image.png"></p>
+<p>这样做的好处是提高了事务的并发，因为最新值的改动不会影响到之前版本的读取。</p>
+<p>那么什么时候删除 unlog log呢？</p>
+<p>在mysql判断到不再需要 undo log 的时候。</p>
+<p>mysql 中会异步的确认，是否该 undo log 还有 read-view 使用（也就是没有比这个undo log更早的 read-view了），如果没有就删除。</p>
+<p><strong>所以尽量不要使用长事务，除长时间的锁资源占用，还可能会有大量的 回滚日志一直得不到释放，占用大量存储空间。</strong></p>
+<h2 id="事务如何使用？"><a href="#事务如何使用？" class="headerlink" title="事务如何使用？"></a>事务如何使用？</h2><ol>
+<li>显式启动事务语句， begin 或 start transaction。配套的提交语句是 commit，回滚语句是 rollback。</li>
+<li>set autocommit=0，这个命令会将这个线程的自动提交关掉。意味着如果你只执行一个 select 语句，这个事务就启动了，而且并不会自动提交。这个事务持续存在直到你主动执行 commit 或 rollback 语句，或者断开连接。</li>
+</ol>
+<p>有些客户端连接框架会默认连接成功后先执行一个 <code>set autocommit=0</code>  的命令。这就导致接下来的查询都在事务中，如果是长连接，就导致了意外的长事务。</p>
+<p>如下，查询超过60s的事务：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.innodb_trx <span class="keyword">where</span> TIME_TO_SEC(timediff(now(),trx_started))<span class="operator">&gt;</span><span class="number">60</span></span><br></pre></td></tr></table></figure>
+
+<p>所以还是建议显示的启动事务，这样更符合语意，让我们知道一个事务启动了。</p>
+<p><strong>当然，显示启动事务会多一次命令交互，如果介意，也可以将 <code>commit</code> 换成 <code>commit work and chain</code>，相当于把<code>commit</code> 和 <code>begin</code>  合成了一条命令。这样 commit 时会自动开启下一次事务，保证语意的同时，也减少了交互次数。</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E4%BA%8B%E5%8A%A1/">https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E4%BA%8B%E5%8A%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://driftingboy.github.io/blog" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/mysql/">mysql</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-order%20by/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">mysql-order by流程</div></div></a></div><div class="next-post pull-right"><a href="/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81%20/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"> mysql-事务与锁</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相關推薦</span></div><div class="relatedPosts-list"><div><a href="/blog/2021/07/07/master_go/mysql-go-type/" title="mysql-golang 类型关系"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-07</div><div class="title">mysql-golang 类型关系</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-explain/" title="mysql-explain"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-explain</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-innodb/" title="mysql-innodb"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-innodb</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-issue-密码问题/" title="mysql-密码问题"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-密码问题</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-数据类型/" title="mysql-数据类型"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-数据类型</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-索引优化策略/" title="mysql-索引优化策略"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-索引优化策略</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/profile.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div><div class="card-info-data-item is-center"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div><div class="card-info-data-item is-center"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/driftingboy/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/driftingboy/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.</span> <span class="toc-text">mysql-事务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">什么是事务？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%89%B9%E6%80%A7"><span class="toc-number">1.2.</span> <span class="toc-text">事务的特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ACID"><span class="toc-number">1.2.1.</span> <span class="toc-text">ACID</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E6%80%A7"><span class="toc-number">1.2.2.</span> <span class="toc-text">隔离性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">隔离如何实现？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="toc-number">1.4.</span> <span class="toc-text">事务如何使用？</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="docker文件系统"/></a><div class="content"><a class="title" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统">docker文件系统</a><time datetime="2021-10-04T08:17:00.000Z" title="發表於 2021-10-04 16:17:00">2021-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="容器实现原理"/></a><div class="content"><a class="title" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理">容器实现原理</a><time datetime="2021-09-30T08:17:00.000Z" title="發表於 2021-09-30 16:17:00">2021-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="golang atomic"/></a><div class="content"><a class="title" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic">golang atomic</a><time datetime="2021-09-21T08:17:00.000Z" title="發表於 2021-09-21 16:17:00">2021-09-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="命令模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式">命令模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'driftingboy/blog')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

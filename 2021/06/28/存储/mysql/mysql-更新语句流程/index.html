@@ -1,0 +1,271 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mysql-数据更新流程 | ATouch</title><meta name="keywords" content="mysql,wal"><meta name="author" content="Xiao Yan"><meta name="copyright" content="Xiao Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="mysql数据更新流程分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql-数据更新流程">
+<meta property="og:url" content="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="ATouch">
+<meta property="og:description" content="mysql数据更新流程分析">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-06-28T08:17:00.000Z">
+<meta property="article:modified_time" content="2021-12-11T16:42:09.011Z">
+<meta property="article:author" content="Xiao Yan">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="wal">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5%E6%B5%81%E7%A8%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-J81JVYHYZ3"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-J81JVYHYZ3');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'mysql-数据更新流程',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-12 00:42:09'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/blog/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/blog/">ATouch</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> go系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/go/gopher/"><i class="fa-fw fas fa-images"></i><span> go进阶训练营</span></a></li><li><a class="site-page child" href="/blog/go/clean-code/"><i class="fa-fw fas fa-video"></i><span> go整洁代码之道</span></a></li><li><a class="site-page child" href="/blog/go/structure-algorithm/"><i class="fa-fw fas fa-video"></i><span> go数据结构与算法</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-link"></i><span> 云原生系列</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/blog/could/docker/"><span> docker</span></a></li><li><a class="site-page child" href="/blog/could/k8s/"><span> k8s</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">mysql-数据更新流程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2021-06-28T08:17:00.000Z" title="發表於 2021-06-28 16:17:00">2021-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2021-12-11T16:42:09.011Z" title="更新於 2021-12-12 00:42:09">2021-12-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E5%AD%98%E5%82%A8/">存储</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="mysql-数据更新流程"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">閱讀量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="mysql-更新流程分析"><a href="#mysql-更新流程分析" class="headerlink" title="mysql-更新流程分析"></a>mysql-更新流程分析</h1><blockquote>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2></blockquote>
+<p>一条更新语句的执行过程，是怎样的呢？</p>
+<p>如下图，和查询过程一样，要经过这些流程。</p>
+<p><img src="https://s2.loli.net/2021/12/06/KAPDxMmEClr8qRs.png" alt="KAPDxMmEClr8qRs.png"></p>
+<p>但是在更新过程中还涉及到一些重要模块，比如两处日志<code>redo log</code>和<code>bin log</code>, 更新缓存<code>change buffer</code>, 接下来一一解析。</p>
+<blockquote>
+<h2 id="bin-log"><a href="#bin-log" class="headerlink" title="bin log"></a>bin log</h2></blockquote>
+<p><code>bin log</code>（归档日志），位于 <code>mysql server</code> 层，所有存储引擎共用。</p>
+<p>其作用就是归档，数据库一般都会定期的整库备份，比如1天1次、一周一次。</p>
+<p>如果误删了数据想要恢复到某个时刻，那么可以找到最近的整库备份，在执行整库备份时刻到恢复时刻间的<code>bin log</code> 就可以恢复数据了。</p>
+<p><code>bin log</code> 的特征如下：</p>
+<ul>
+<li>它是一种::逻辑日志::，记录的是完整的逻辑操作，比如 ‘比如“给 ID=2 这一行的 c 字段加 1 ’（两种格式 statement 格式的话是记sql语句， row格式会记录行的内容，记两条，更新前和更新后都有）。</li>
+<li><code>bin log</code>  采用::追加写::的模式，当<code>bin log</code> 的文件写到一定大小的时候，会切换到下一个文件，而不会覆盖之前的记录。</li>
+</ul>
+<blockquote>
+<h2 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h2></blockquote>
+<p><code>redo log</code>  是<code>innodb</code>  引擎实现的，因为 <code>bin log</code>  没有 ::crash-safe::的能力<strong>，innoDB 加入了另外一套系统来实现 crash-safe 的能力。</strong></p>
+<p>redo log 能减少随机写磁盘，提高写入效率。 先记录日志，空闲时写磁盘的这种方式，我们又称为 ::WAL （write-ahead logging）::技术,。这是一种提升写入效同时保证数据不会丢失的技术，涉及到存储的中间件几乎都会使用到 WAL。</p>
+<p>接下来看看 mysql 中的 redo log 是如何实现的， 如图：</p>
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/67086C87-EC8A-4F2A-9D95-D0899EB2E66F/F1404BCB-F143-4BFA-93A0-02714AADD11E_2/Image.png" alt="Image.png"></p>
+<p>通过这个图，我们可以知道</p>
+<p><code>redo log</code> 的空间有限；比如配置为4个文件，每个文件1GB，总大小就是4GB，写到了尾部又从头部开始覆盖写。</p>
+<p><strong>什么时候产生？</strong></p>
+<p>当有数据插入、删除、更新，即内存中产生了脏页就会记录 redo log</p>
+<p><strong>什么时候删除？</strong></p>
+<p><code>check point</code>  是当前擦除位置， <code>wirte pos</code>  是当前记录位置；[wirte pos, check point]为可写区间， 除了空闲的时间会flush 数据到磁盘，当<code>wirte pos</code>  追上了 <code>check point</code> ，也会推进 <code>check point</code> ，把一部分数据flush 到磁盘中。</p>
+<p>最后，建议将 redo log 稍微开大一些，比如 几个T的硬盘，可以设置4个文件，没个文件1GB；否则 redo log 频繁写满导致刷盘，就起不到优化性能的作用了。</p>
+<blockquote>
+<h2 id="两个日志的关系"><a href="#两个日志的关系" class="headerlink" title="两个日志的关系"></a>两个日志的关系</h2></blockquote>
+<p><strong>为什么需要两个日志呢</strong>？</p>
+<p>mysql 设计之初，是没有 <code>redo log</code> 的，只有 <code>bin log</code> . bin log 是属于 mysql server 层的，所有存储引擎都可以使用，但是bin log只有归档能力。</p>
+<p>redo log 是 InnoDB 特有的日志，用来实现crash-safe的能力。</p>
+<p>但是，拥有了两份日志，一致性的问题就需要考虑了，你可以想想如下两种情况</p>
+<ol>
+<li>先记录 redo log，后记录 bin log</li>
+</ol>
+<p>如果在写入 redo log 后，bin log 未写入时奔溃，后续mysql重启主库可以恢复数据，但是由于bin log缺失，会导致主从数据不一致等问题。</p>
+<ol start="2">
+<li>先记录 bin log，后记录 redo log</li>
+</ol>
+<p>如果在写入 bin log 后，未写入 redo log 时奔溃，重启后 bin log 就多了一条，也会导致不一致产生。</p>
+<p>所以 innoDB 设计了 ::两阶段提交::，流程如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update <span class="keyword">user</span> <span class="keyword">set</span> age<span class="operator">=</span>age<span class="operator">+</span><span class="number">1</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/67086C87-EC8A-4F2A-9D95-D0899EB2E66F/7E2F5114-8BF0-45AA-8415-98C0F599442D_2/Image.png" alt="Image.png"></p>
+<p>有了 ::两阶段提交，::我们再来看看现在发生崩溃时会不会造成不一致，情况如下：</p>
+<ol>
+<li>当 redo log 只有完整的 perpare，处于prepare状态<ol>
+<li>::bin log 不存在或不完整::； 当数据库恢复，事务会被回滚，以保证和 bin log 数据一致</li>
+<li>::bin log 存在且完整; 当数据库恢复::，事务会被提交，保持和 bin log 数据一致</li>
+</ol>
+</li>
+<li>当redo log 已经为 commit 状态，直接提交事务</li>
+</ol>
+<p><strong>那 mysql 是如何知道 bin log 是否完整的呢？</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">首先，要通过 redo log 找到 bin log。</span><br><span class="line"></span><br><span class="line">奔溃后恢复，会扫描 redo log，通过它们共同的字段 XID 去关联。这时有如下两种情况：</span><br><span class="line"></span><br><span class="line">1）检测到既有 prepare， 又有 commit 的 redo log，直接提交</span><br><span class="line"></span><br><span class="line">2）检测到只有 prepare 标识，通过 XID 查询 bin log 检查是否完整</span><br><span class="line"></span><br><span class="line">找到bin log后，mysql 通过 bin log 的数据格式来检查其是否完整</span><br><span class="line">- statement 格式的 bin log，结尾会有 commit；</span><br><span class="line">- row 格式的 bin log，结尾会有 XID event；</span><br><span class="line"></span><br><span class="line">另外，在 MySQL 5.6.2 版本以后，还引入了 binlog-checksum 参数，用来验证 binlog 内容的正确性。</span><br><span class="line">如果 binlog 日志由于磁盘原因，有日志中出错的情况，MySQL 可以通过校验 checksum 的结果来发现。</span><br></pre></td></tr></table></figure>
+
+<p><strong>上面的这些过程都是由于有着两个日志系统导致的，那么bin log 和 redo log 的功能可以合并，交给一个日志去做吗？</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">我们都知道，有 bin log 和 redo log 两个日志系统是因为mysql历史问题。</span><br><span class="line">那从技术的角度考虑，bin log 和 redo log 可以合并成一个日志吗，这样不就不需要两阶段提交了，下面就具体分析一下：</span><br><span class="line"></span><br><span class="line">bin log 和 redo log 在内存更新时就产生了，不过bin log会追加写，我们无法确定它对应的数据是否已经在磁盘中了，所以没办法知道奔溃后执行哪些 bin log。</span><br><span class="line">而 redo log，通过 check pointer 可以确定执行哪些日志去恢复数据。</span><br><span class="line"></span><br><span class="line">那是不是调整一下 bin log 的结构，在其中加入 check pointer 就可以呢，其实这就相当于又实现了一个 redo log。</span><br><span class="line">没必要把两块功能耦合在一起，毕竟可能有一些存储引擎不需要crash-safe的能力，比如mermeroy引擎。</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<h2 id="change-buffer"><a href="#change-buffer" class="headerlink" title="change buffer"></a>change buffer</h2></blockquote>
+<p>在 更新远大于读取的场景下，有非常不错的收益，比如一些计量、日志系统等。</p>
+<p>redo log可以减少随机写，而change buffer可以减少随机读（一次顺序写替换一次随机读）</p>
+<p>加入 <code>change buffer</code>  后</p>
+<p>写入流程如下：</p>
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/67086C87-EC8A-4F2A-9D95-D0899EB2E66F/FD982C53-B081-46FA-A846-922F4714DEAA_2/Image.png" alt="Image.png"></p>
+<p>读取流程如下：</p>
+<p>当查询数据时，如果发现内存里没有，就从磁盘中读取对应数据页，和 change buffer 中对应数据页修改信息做一个merge ，计算结果更新到内存（脏页），生成 redo log，返回结果。</p>
+<blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2></blockquote>
+<p>redo log crash-safe（恢复脏页） 写优化, bin log 归档， redo log+状态 和 bin log 决定是否提交。</p>
+<p>change buffer 更新读优化。</p>
+<p>最后附上一张完整的mysql查询、更新流程图，帮助你理解上面这些知识。</p>
+<p><img src="https://res.craft.do/user/full/c08a465b-93e5-c0ee-4310-637acb8215b4/doc/67086C87-EC8A-4F2A-9D95-D0899EB2E66F/C416F82D-CD99-4C13-9ED3-5E0BFFEC648C_2/Image.png" alt="Image.png"></p>
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><p><a target="_blank" rel="noopener" href="https://www.modb.pro/db/74015">MySQL的日志 - redo log - 墨天轮</a></p>
+<p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/68633">02 | 日志系统：一条SQL更新语句是如何执行的？-极客时间</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiao Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章連結: </span><span class="post-copyright-info"><a href="https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5%E6%B5%81%E7%A8%8B/">https://driftingboy.github.io/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5%E6%B5%81%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://driftingboy.github.io/blog" target="_blank">ATouch</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/mysql/">mysql</a><a class="post-meta__tags" href="/blog/tags/wal/">wal</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E6%B5%81%E7%A8%8B/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">mysql-数据查询流程</div></div></a></div><div class="next-post pull-right"><a href="/blog/2021/06/28/%E5%AD%98%E5%82%A8/mysql/mysql-join%20%E6%B5%81%E7%A8%8B/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/blog/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">mysql-join 流程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相關推薦</span></div><div class="relatedPosts-list"><div><a href="/blog/2021/07/07/master_go/mysql-go-type/" title="mysql-golang 类型关系"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-07</div><div class="title">mysql-golang 类型关系</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-explain/" title="mysql-explain"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-explain</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-innodb/" title="mysql-innodb"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-innodb</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-issue-密码问题/" title="mysql-密码问题"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-密码问题</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-数据类型/" title="mysql-数据类型"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-数据类型</div></div></a></div><div><a href="/blog/2021/06/28/存储/mysql/mysql-索引优化策略/" title="mysql-索引优化策略"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-28</div><div class="title">mysql-索引优化策略</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 評論</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/blog/img/profile.jpg" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Xiao Yan</div><div class="author-info__description">后端成长之路</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">64</div></a></div><div class="card-info-data-item is-center"><a href="/blog/tags/"><div class="headline">標籤</div><div class="length-num">31</div></a></div><div class="card-info-data-item is-center"><a href="/blog/categories/"><div class="headline">分類</div><div class="length-num">10</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/driftingboy/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/driftingboy/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1425895909@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">mysql-更新流程分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bin-log"><span class="toc-number">1.2.</span> <span class="toc-text">bin log</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redo-log"><span class="toc-number">1.3.</span> <span class="toc-text">redo log</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E6%97%A5%E5%BF%97%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.4.</span> <span class="toc-text">两个日志的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#change-buffer"><span class="toc-number">1.5.</span> <span class="toc-text">change buffer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reference"><span class="toc-number">1.7.</span> <span class="toc-text">reference</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="docker文件系统"/></a><div class="content"><a class="title" href="/blog/2021/10/04/%E4%BA%91%E5%8E%9F%E7%94%9F/docker%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="docker文件系统">docker文件系统</a><time datetime="2021-10-04T08:17:00.000Z" title="發表於 2021-10-04 16:17:00">2021-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="容器实现原理"/></a><div class="content"><a class="title" href="/blog/2021/09/30/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%AE%B9%E5%99%A8%E5%8E%9F%E7%90%86/" title="容器实现原理">容器实现原理</a><time datetime="2021-09-30T08:17:00.000Z" title="發表於 2021-09-30 16:17:00">2021-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="golang atomic"/></a><div class="content"><a class="title" href="/blog/2021/09/21/master_go/atomic/" title="golang atomic">golang atomic</a><time datetime="2021-09-21T08:17:00.000Z" title="發表於 2021-09-21 16:17:00">2021-09-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="状态模式"/></a><div class="content"><a class="title" href="/blog/2021/07/28/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/" title="状态模式">状态模式</a><time datetime="2021-07-28T08:17:00.000Z" title="發表於 2021-07-28 16:17:00">2021-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/blog/img/404.jpg'" alt="命令模式"/></a><div class="content"><a class="title" href="/blog/2021/07/25/%E6%95%B4%E6%B4%81%E4%BB%A3%E7%A0%81/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" title="命令模式">命令模式</a><time datetime="2021-07-25T08:17:00.000Z" title="發表於 2021-07-25 16:17:00">2021-07-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Xiao Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直達評論"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到頂部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><div class="js-pjax"><script>function loadUtterances () {
+  let ele = document.createElement('script')
+  ele.setAttribute('id', 'utterances_comment')
+  ele.setAttribute('src', 'https://utteranc.es/client.js')
+  ele.setAttribute('repo', 'driftingboy/blog')
+  ele.setAttribute('issue-term', 'pathname')
+  let nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+  ele.setAttribute('theme', nowTheme)
+  ele.setAttribute('crossorigin', 'anonymous')
+  ele.setAttribute('async', 'true')
+  document.getElementById('utterances-wrap').insertAdjacentElement('afterbegin',ele)
+}
+
+function utterancesTheme () {
+  if (document.querySelector('.utterances-frame')) {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    const message = {
+      type: 'set-theme',
+      theme: theme
+    };
+    const iframe = document.querySelector('.utterances-frame');
+    iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+  }
+}
+
+if ('Utterances' === 'Utterances' || !false) {
+  if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+  else loadUtterances()
+} else {
+  function loadOtherComment () {
+    loadUtterances()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
